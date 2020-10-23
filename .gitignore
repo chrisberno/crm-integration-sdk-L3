@@ -1,0 +1,4 @@
+node_modules/
+.vscode
+.twilio-functions
+.DS_Store
