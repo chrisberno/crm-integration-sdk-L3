@@ -59,10 +59,6 @@ exports.handler = function (context, event, callback) {
             response.setStatusCode(500);
             return callback(null, response);
           });
-      } else {
-        response.setBody('User not authorised to access security questions');
-        response.setStatusCode(401);
-        return callback(null, response);
       }
     })
     .catch((err) => {

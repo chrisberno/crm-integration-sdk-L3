@@ -15,7 +15,7 @@ class SecurityQuestions extends React.Component {
     // (this is merely a convenience measure, not a security one as
     // the proxy function handles the access control)
     this.authorized =
-      this.props.manager.user.roles.includes('admin') ||
+      this.props.manager.user.roles.includes('supervisor') ||
       // include any specific users you want to allow (e.g. for testing)
       this.props.manager.user.identity === 'jowling';
 
