@@ -59,32 +59,43 @@ class SecurityQuestions extends React.Component {
           token: null /* the user's jwt token */
         })
       })
-        .then((response) => {
+        .then(async (response) => {
           if (response.ok) {
             return response.json();
           } else {
             // throw an error if we received any error from the Function
-            console.error('CRM fetch failed, response:', response);
-            throw new Error('Failed to fetch from CRM');
+            console.error(response);
+            if (response.status && response.body) {
+              throw new Error(
+                `Proxy function returned "${await response.text()}"`
+              );
+            } else {
+              throw new Error("Couldn't fetch questions from CRM");
+            }
           }
         })
         .then((questions) => {
           // save fetched questions in component's state
           this.setState({ questions: questions.security_questions });
         })
+        // handle errors from the Function or thrown during the fetch
         .catch((error) => {
-          // handle errors received from the Function or thrown during the fetch
-          console.error('CRM request failed', error);
+          console.error('Fetch of security questions failed:', error);
           this.setState({
-            questions: `Error: Couldn't fetch questions from CRM.`
+            questions: error.toString()
           });
         });
     }
   }
 
   render() {
-    // don't display anything for unauthorized users
-    if (!this.authorized) return null;
+    // display explanation for unauthorized users
+    if (!this.authorized)
+      return (
+        <SqContainer style={{ opacity: '0.5' }}>
+          Agent not authorized to access security questions
+        </SqContainer>
+      );
 
     const header = (
       <HeaderLine>

@@ -4,22 +4,6 @@ const crmUrl = 'https://owlcrm-4339-dev.twil.io';
 
 exports.handler = function (context, event, callback) {
   let response = new Twilio.Response();
-  if (isNaN(event.id)) {
-    response.setBody(`Missing 'id' parameter.`);
-    response.setStatusCode(400);
-    return callback(null, response);
-  }
-  if (!event.token) {
-    response.setBody(`Missing 'token' parameter.`);
-    response.setStatusCode(400);
-    return callback(null, response);
-  }
-  if (!context.CRM_APIKEY) {
-    response.setBody(`Missing API key in the function's environment.`);
-    response.setStatusCode(500);
-    return callback(null, response);
-  }
-
   // '*' allows being called from any origin, this not the best security
   // practice and should only be used for testing; when builiding a production
   // plugin you should set the allowed origin to 'https://flex.twilio.com'
@@ -28,6 +12,22 @@ exports.handler = function (context, event, callback) {
 
   response.appendHeader('Access-Control-Allow-Methods', 'OPTIONS POST');
   response.appendHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (isNaN(event.id)) {
+    response.setBody(`Missing 'id' parameter`);
+    response.setStatusCode(400);
+    return callback(null, response);
+  }
+  if (!event.token) {
+    response.setBody(`Missing 'token' parameter`);
+    response.setStatusCode(400);
+    return callback(null, response);
+  }
+  if (!context.CRM_APIKEY) {
+    response.setBody(`Missing API key (CRM_APIKEY) environment variable`);
+    response.setStatusCode(500);
+    return callback(null, response);
+  }
 
   TokenValidator(event.token, context.ACCOUNT_SID, context.AUTH_TOKEN)
     .then((tokenResult) => {
@@ -59,6 +59,12 @@ exports.handler = function (context, event, callback) {
             response.setStatusCode(500);
             return callback(null, response);
           });
+      } else {
+        const errUserAuth = 'User not authorized to access security questions';
+        console.error(errUserAuth);
+        response.setBody(errUserAuth);
+        response.setStatusCode(401);
+        return callback(null, response);
       }
     })
     .catch((err) => {
