@@ -15,9 +15,9 @@ class SecurityQuestions extends React.Component {
     // (this is merely a convenience measure, not a security one as
     // the proxy function handles the access control)
     this.authorized =
-      this.props.manager.user.roles.includes('supervisor') ||
+      this.props.manager.user.roles.includes('agent') ||
       // include any specific users you want to allow (e.g. for testing)
-      this.props.manager.user.identity === 'jowling';
+      this.props.manager.user.identity === 'cberno';
 
     this.state = {
       questions: undefined
@@ -40,23 +40,23 @@ class SecurityQuestions extends React.Component {
     // first, test if account number is provided via Task attributes
     if (
       !(
-        this.props.task &&
-        this.props.task.attributes &&
-        this.props.task.attributes.account_number
+        this.props.task?.attributes?.account_number
       )
     ) {
       this.setState({ questions: 'Error: Account number not found' });
     } else {
       // if there is an account number, fetch the security questions
       // (we're using POST to avoid passing the token as a query param)
-      fetch(null /* insert URL of the proxy function */, {
+      fetch( 'https://fx5-proxy-function-3454-dev.twil.io/crm-proxy', {
         method: 'POST',
         headers: {
           'content-type': 'application/json'
         },
         body: JSON.stringify({
-          id: null /* the account number from the task attributes */,
-          token: null /* the user's jwt token */
+          // id: null /* the account number from the task attributes */,
+          // token: null /* the user's jwt token */
+          id: this.props.task.attributes.account_number,
+          token: this.props.manager.user.token
         })
       })
         .then(async (response) => {

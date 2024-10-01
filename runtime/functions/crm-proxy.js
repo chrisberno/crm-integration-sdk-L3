@@ -2,8 +2,8 @@ const fetch = require('node-fetch');
 const TokenValidator = require('twilio-flex-token-validator').validator;
 const crmUrl = 'https://owlcrm-4339-dev.twil.io';
 
-exports.handler = function (context, event, callback) {
-  let response = new Twilio.Response();
+exports.handler = (context, event, callback) => {
+  const response = new Twilio.Response();
   // '*' allows being called from any origin, this not the best security
   // practice and should only be used for testing; when builiding a production
   // plugin you should set the allowed origin to 'https://flex.twilio.com'
@@ -13,6 +13,7 @@ exports.handler = function (context, event, callback) {
   response.appendHeader('Access-Control-Allow-Methods', 'OPTIONS POST');
   response.appendHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+  // biome-ignore lint/suspicious/noGlobalIsNan: <explanation>
   if (isNaN(event.id)) {
     response.setBody(`Missing 'id' parameter`);
     response.setStatusCode(400);
@@ -24,7 +25,7 @@ exports.handler = function (context, event, callback) {
     return callback(null, response);
   }
   if (!context.CRM_APIKEY) {
-    response.setBody(`Missing API key (CRM_APIKEY) environment variable`);
+    response.setBody("Missing API key (CRM_APIKEY) environment variable");
     response.setStatusCode(500);
     return callback(null, response);
   }
@@ -33,9 +34,9 @@ exports.handler = function (context, event, callback) {
     .then((tokenResult) => {
       // token validated
       if (
-        tokenResult.roles.includes('supervisor') ||
+        tokenResult.roles.includes('agent') ||
         // include any specific users you want to allow (e.g. for testing)
-        tokenResult.identity === 'jowling'
+        tokenResult.identity === 'cberno'
       ) {
         // Flex user is allowed to access security questions
         const data = new URLSearchParams();
